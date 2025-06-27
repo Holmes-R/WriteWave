@@ -43,9 +43,7 @@ export const addBlog = async (req, res) => { // Changed from response to res
         fs.unlinkSync(imageFile.path);
 
         return res.status(201).json({ success: true, message: "Blog added successfully" });
-        console.log("req.body.blog:", req.body.blog);
-console.log("req.file:", req.file);
-
+     
 
     } catch (error) {
         console.error("Error adding blog:", error);
