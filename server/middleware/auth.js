@@ -10,4 +10,3 @@ const auth =(request,response,next)=>{
     }
 }
 export default auth
- 

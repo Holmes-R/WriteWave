@@ -60,3 +60,98 @@ console.log("req.file:", req.file);
         });
     }
 };
+
+
+export const getAllBlog = async (req, res) => {
+    try{
+        const blogs = await Blog.find({ isPublished: true });
+        res.json({ success: true, blogs });
+
+    }catch(error) {
+        console.error("Error fetching blogs:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+export const getBlogById = async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        const blog = await Blog.findById(blogId);
+        if(!blog){
+            return res.json({ success: false, message: "Blog not found" });
+        }
+        return res.json({ success: true, blog });
+    } catch (error) {
+        res.json({ 
+            success: false, 
+            message: error.message
+           
+        });
+    }
+}
+
+export const DeleteBlogById = async (req, res) => {
+    try {
+            const { id } = req.body;
+    await Blog.findByIdAndDelete(id);
+
+    await Comment.deleteMany({blog:id})
+
+        return res.json({ success: true, message: "Blog deleted successfully" });
+      
+    } catch (error) {
+        res.json({ 
+            success: false, 
+            message: error.message
+           
+        });
+    }
+}
+
+export const togglePublish = async (req, res) => {
+    try{
+            const { id } = req.body;
+    const blog = await Blog.findById(id);
+
+        blog.isPublished = !blog.isPublished;
+        await blog.save();
+        return res.json({ success: true, message: "Blog publish status updated",  });
+    }catch(error) {
+        res.json({ 
+            success: false, 
+            message: error.message
+           
+        });
+    }
+}
+
+export const addComment = async (req, res) => {
+    try{
+        const {blog,name,content} = req.body;
+        await Comment.create({blog,name,content})
+        return res.json({ success: true, message: "Comment added successfully" });
+
+    }catch(error) {
+        console.error("Error adding comment:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Internal server error",
+            
+        });
+    }
+}
+
+export const getBlogComments = async (req, res) => {
+    try{
+        const {blogId} = req.body;
+        const comments = await Comment.find({blog:blogId, isApproved:true}).sort({createdAt:-1});
+        return res.json({ success: true, comments });
+        
+    }catch(error){
+        return res.status(500).json({ 
+            success: false, 
+            message: "Internal server error",
+        });
+
+    }
+}
