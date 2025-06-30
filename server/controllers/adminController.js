@@ -1,19 +1,21 @@
 import jwt from "jsonwebtoken";
-import Blog from "../models/Blog";
+import Blog from "../models/Blog.js";
+import Comment from "../models/Comment.js";
+import User from "../models/User.js";
 
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (
-      email !== process.env.ADMIN_EMAIL ||
-      password !== process.env.ADMIN_PASSWORD
-    ) {
-      return res.status(401).json({ success: false, message: "Invalid Credentials" });
-    }
+    email !== process.env.ADMIN_EMAIL ||
+    password !== process.env.ADMIN_PASSWORD
+  ) {
+    return res.status(401).json({ success: false, message: "Invalid Credentials" });
+  }
 
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ success: true, token });
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  res.json({ success: true, token });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

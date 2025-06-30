@@ -38,14 +38,35 @@ export const register = async (req, res) => {
             success: false,
             message: 'Internal server error',
         });
+
+        
     }
 }
+
 export const getProfile = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username }).select('-password');
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    return res.json({ success: true, token });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

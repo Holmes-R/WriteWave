@@ -1,7 +1,7 @@
 import mongoose, { mongo } from "mongoose";
 
 
-const blogSchema = new mongoose.Schema({
+const CommentSchema = new mongoose.Schema({
 
     blog : {type:mongoose.Schema.Types.ObjectId, ref: 'blog', required:true},
     name :{
@@ -19,6 +19,6 @@ const blogSchema = new mongoose.Schema({
 
 },{timestamps:true})
 
-const Blog = mongoose.model('blog',blogSchema)
-export default Blog
+const Comment = mongoose.models.comment || mongoose.model('comment', CommentSchema);
+export default Comment;
 
