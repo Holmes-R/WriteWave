@@ -1,48 +1,61 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js'; // Make sure this path is correct
+
 export const register = async (req, res) => {
-    try{
-        const { username, email, password } = req.body;
-        const avatar = req.file
+    try {
+        console.log("Request Body:", req.body);
+        console.log("Uploaded File:", req.file);
+
+        const { username, email, password } = req.body || {};
+
         if (!username || !email || !password) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
-            })
-    }
-    const existingUser = await User.findOne({email});
-    if(existingUser) {
-        return res.json({
-            success: false,
-            message: 'Email already exists'
-        });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-        username,
-        email,
-        password: hashedPassword,
-        avatarUrl: avatar ? `server/uploads/avatars/${avatar.filename}` : null, // Store the file path if avatar is uploaded
-    });
-   return res.json({
-        success: true,
-        message: 'User registered successfully',
-        user: {
-            id: newUser._id,
-            username: newUser.username,
-            email: newUser.email,
-            avatarUrl: newUser.avatarUrl,
+                message: 'Username, email and password are required'
+            });
         }
-    });
-}
-    catch (error) {
+
+        // Check if user exists
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: 'Email or username already exists'
+            });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = await User.create({
+            username,
+            email,
+            password: hashedPassword,
+            avatarUrl: req.file ? `/uploads/avatars/${req.file.filename}` : null,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: 'User registered successfully',
+            user: {
+                id: newUser._id,
+                username: newUser.username,
+                email: newUser.email,
+                avatarUrl: newUser.avatarUrl,
+            }
+        });
+
+    } catch (error) {
         console.error('Registration error:', error);
         return res.status(500).json({
             success: false,
             message: 'Internal server error',
+            error: error.message
         });
-
-        
     }
 }
-
 export const getProfile = async (req, res) => {
   try {
     const { username } = req.params;
