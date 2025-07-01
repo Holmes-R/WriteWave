@@ -76,11 +76,79 @@ export const login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Payload must match what auth middleware expects
+    const token = jwt.sign(
+      {
+        userId: user._id.toString(), // Ensure this is a string
+        email: user.email,
+        role: user.role || 'user' // Default role if not specified
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    return res.json({ success: true, token });
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const editProfile = async (req, res) => {
+  try {
+    const { username: requestedUsername } = req.params;
+    const { username: newUsername, bio } = req.body || {};
+    const avatar = req.file;
+
+    // Verify the requesting user has permission
+    if (req.user.username !== requestedUsername && req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Unauthorized to edit this profile" 
+      });
+    }
+
+    const user = await User.findOne({ username: requestedUsername });
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
+    }
+
+    // Update fields
+    if (newUsername) user.username = newUsername;
+    if (bio) user.bio = bio;
+    if (avatar) {
+      user.avatarUrl = `/uploads/avatars/${avatar.filename}`;
+    }
+
+    await user.save();
+    
+    return res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        username: user.username,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
