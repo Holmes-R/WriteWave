@@ -9,6 +9,6 @@ const UserSchema = new mongoose.Schema({
   joinDate: { type: Date, default: Date.now },
   lastPostedAt: { type: Date },
 });
-
+  
 const User = mongoose.models.user || mongoose.model('user', UserSchema);
 export default User;
