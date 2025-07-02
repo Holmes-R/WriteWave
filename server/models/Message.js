@@ -18,7 +18,16 @@ const messageSchema = new mongoose.Schema({
     timestamp :{
         type:Date,
         default : Date.now
+    },
+    image :{
+        type:String,
+        default:null
+    },
+    seen:{
+        type:Boolean,
+        default:false
     }
+
 })
 
 const Message = mongoose.models.message || mongoose.model('message', messageSchema);

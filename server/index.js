@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import adminRouter from './routes/adminRouters.js';
 import blogRouter from './routes/blogRouters.js';
 import userRouter from './routes/userRouters.js';
+
+import messageRouters from './routes/messageRouters.js';
 import { Server } from 'socket.io';
 import http from 'http';
 
@@ -23,36 +25,26 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/admin', adminRouter);
 app.use('/api/blog', blogRouter);
 app.use('/api/users', userRouter); 
-app.use('/api/chat', chatRouter);
-
+//app.use('/api/chat', chatRouter);
+app.use('api/message', messageRouters);
 
 const httpServer = http.createServer(app);
-const io = new Server(httpServer,{
+export const io = new Server(httpServer,{
   cors:{  origin:'*'}
 })
 
+export const userSocketMap = {}
+
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  const userId = socket.handshake.query.userId
+  console.log('User connected:', userId);
 
-  socket.on('join', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their personal room`);
-  });
-
-  // Listen for new messages
-  socket.on('send_message', async ({ senderId, receiverId, content }) => {
-    const newMessage = new Message({ sender: senderId, receiver: receiverId, content });
-    await newMessage.save();
-
-    // Emit to receiver room
-    io.to(receiverId).emit('receive_message', {
-      senderId,
-      content,
-      timestamp: newMessage.timestamp
-    });
-  });
-
+  if(userId) userSocketMap[userId] = socket.id;
+  io.emit("getOnlineUsers", userSocketMap);
+  
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
+    console.log("User Disconnected",userId);
+    delete userSocketMap[userId]
+    io.emit("getOnlineUsers".Object.keys(userSocketMap))
+  })
 });
