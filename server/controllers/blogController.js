@@ -1,12 +1,12 @@
 import fs from 'fs';
-import Blog from '../models/Blog.js'; // Fixed import (was User.js)
+import Blog from '../models/Blog.js'; 
 import imagekit from '../config/imageKit.js';
 import { request } from 'http';
 
-export const addBlog = async (req, res) => { // Changed from response to res
+export const addBlog = async (req, res) => { 
     try {
         const { title, subTitle, description, category, isPublished } = JSON.parse(req.body.blog);
-        const imageFile = req.file; // Changed from File to file
+        const imageFile = req.file;
         
         if (!title || !description || !category || !imageFile) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -74,21 +74,38 @@ export const getAllBlog = async (req, res) => {
 }
 
 export const getBlogById = async (req, res) => {
-    try {
-        const blogId = req.params.id;
-        const blog = await Blog.findById(blogId);
-        if(!blog){
-            return res.json({ success: false, message: "Blog not found" });
-        }
-        return res.json({ success: true, blog });
-    } catch (error) {
-        res.json({ 
-            success: false, 
-            message: error.message
-           
-        });
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.json({ success: false, message: "Blog not found" });
     }
-}
+
+    blog.views = (blog.views || 0) + 1;
+    await blog.save();
+
+    return res.json({ success: true, blog });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const incrementShareCount = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
+
+    blog.shares = (blog.shares || 0) + 1;
+    await blog.save();
+
+    res.json({ success: true, shares: blog.shares });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 
 export const DeleteBlogById = async (req, res) => {
     try {
