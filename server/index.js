@@ -24,7 +24,7 @@ app.use('/uploads', express.static('uploads'));
 
 app.use('/api/admin', adminRouter);
 app.use('/api/blog', blogRouter);
-app.use('/api/users', userRouter); 
+app.use('/api/users', userRouter);
 //app.use('/api/chat', chatRouter);
 app.use('api/message', messageRouters);
 

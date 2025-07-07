@@ -56,16 +56,25 @@ export const register = async (req, res) => {
         });
     }
 }
+
+
 export const getProfile = async (req, res) => {
   try {
-    const { username } = req.params;
-    const user = await User.findOne({ username }).select('-password');
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    const { id } = req.params;
+
+    const user = await User.findById(id).select('-password');
+
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found" });
+
     res.json({ success: true, user });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 
 export const login = async (req, res) => {
   try {
@@ -102,30 +111,29 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const editProfile = async (req, res) => {
   try {
-    const { username: requestedUsername } = req.params;
+    const { id: requestedUserId } = req.params;
     const { username: newUsername, bio } = req.body || {};
     const avatar = req.file;
 
-    // Verify the requesting user has permission
-    if (req.user.username !== requestedUsername && req.user.role !== 'admin') {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Unauthorized to edit this profile" 
+    // ✅ Check if current user is the same or admin
+    if (req.user.userId !== requestedUserId && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to edit this profile"
       });
     }
 
-    const user = await User.findOne({ username: requestedUsername });
+    const user = await User.findById(requestedUserId);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "User not found" 
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
       });
     }
 
-    // Update fields
+    // ✅ Update fields
     if (newUsername) user.username = newUsername;
     if (bio) user.bio = bio;
     if (avatar) {
@@ -133,7 +141,7 @@ export const editProfile = async (req, res) => {
     }
 
     await user.save();
-    
+
     return res.json({
       success: true,
       message: "Profile updated successfully",

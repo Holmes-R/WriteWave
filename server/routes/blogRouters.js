@@ -1,12 +1,8 @@
 import express from 'express';
-import { addBlog, addComment, DeleteBlogById, generateContent, getAllBlog, getBlogById,getBlogComments,togglePublish } from '../controllers/blogController.js';
+import { addBlog, addComment, DeleteBlogById, generateContent, getAllBlog, getBlogById,getBlogComments,togglePublish,incrementShareCount } from '../controllers/blogController.js';
 import upload from '../middleware/multer.js';
 import auth from '../middleware/auth.js';
-import {
-  getBlogById,
-  incrementShareCount,
-  getTopAnalytics
-} from '../controllers/blogController.js';
+
 
 const blogRouter = express.Router();
 
