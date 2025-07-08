@@ -11,7 +11,6 @@ import messageRouters from './routes/messageRouters.js';
 import { Server } from 'socket.io';
 import http from 'http';
 
-
 dotenv.config();
 const app = express();
 await connectDB();
@@ -48,7 +47,6 @@ io.on('connection', (socket) => {
     io.emit("getOnlineUsers".Object.keys(userSocketMap))
   })
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
