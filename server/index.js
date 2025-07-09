@@ -6,7 +6,8 @@ import dotenv from "dotenv";
 import adminRouter from './routes/adminRouters.js';
 import blogRouter from './routes/blogRouters.js';
 import userRouter from './routes/userRouters.js';
-
+import './models/User.js';
+import './models/Message.js'
 import messageRouters from './routes/messageRouters.js';
 import { Server } from 'socket.io';
 import http from 'http';
@@ -25,7 +26,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/blog', blogRouter);
 app.use('/api/users', userRouter);
 //app.use('/api/chat', chatRouter);
-app.use('api/message', messageRouters);
+app.use('/api/messages', messageRouters); 
 
 const httpServer = http.createServer(app);
 export const io = new Server(httpServer,{
@@ -48,7 +49,10 @@ io.on('connection', (socket) => {
   })
 });
 
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

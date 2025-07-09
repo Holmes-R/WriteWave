@@ -1,34 +1,35 @@
+// models/Message.js
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
-    sender :{
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Must exactly match the model name
+        required: true
+    },
+    receiver: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    receiver :{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+    content: {
+        type: String,
         required: true
     },
-    content :{
-        type:String,
-        required:true
+    timestamp: {
+        type: Date,
+        default: Date.now
     },
-    timestamp :{
-        type:Date,
-        default : Date.now
+    image: {
+        type: String,
+        default: null
     },
-    image :{
-        type:String,
-        default:null
-    },
-    seen:{
-        type:Boolean,
-        default:false
+    seen: {
+        type: Boolean,
+        default: false
     }
+});
 
-})
-
-const Message = mongoose.models.message || mongoose.model('message', messageSchema);
-export default Message 
+// Check if model already exists before creating
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+export default Message;
