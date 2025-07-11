@@ -133,7 +133,7 @@ export const editProfile = async (req, res) => {
       });
     }
 
-    // ✅ Update fields
+
     if (newUsername) user.username = newUsername;
     if (bio) user.bio = bio;
     if (avatar) {
