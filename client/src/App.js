@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { useState } from "react";
-
+import EditProfile from "./pages/Profile";
 function App() {
   const [user,setUser] = useState(JSON.parse(localStorage.getItem("user")))
   const [token,setToken] = useState(localStorage.getItem("token"))
@@ -22,6 +22,9 @@ function App() {
     <Routes>
       <Route path='/login' element={<Login setUser={setUser} setToken={setToken}  />}/> 
        <Route path="/register" element={<Register />} />
+
+        <Route path="/profile/:id/edit" element={<EditProfile />} />
+
     </Routes>
     </BrowserRouter>
   );

@@ -9,7 +9,7 @@ const Register = () => {
         username:"",
         email:"",
         password:"",
-        avatar:null,
+       // avatar:null,
     })
     
     const navigate = useNavigate();
@@ -34,12 +34,14 @@ const Register = () => {
         const res = await api.post("/users/register", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-
+        console.log(res.data);
         if (res.data.success) {
           const userID = res.data.user.id;
+           localStorage.setItem("token", res.data.token); 
           localStorage.setItem("userID", userID);
           alert("Registration successful!");
-          navigate(`${userID}/edit`);
+          navigate(`/profile/${userID}/edit`);
+
         } else {
           alert("Registration failed: " + res.data.message);
         }
@@ -78,13 +80,7 @@ const Register = () => {
         required
         style={inputStyle}
       />
-      <input
-        type="file"
-        name="avatar"
-        accept="image/*"
-        onChange={handleChange}
-        style={inputStyle}
-      />
+      
       <button type="submit" style={buttonStyle}>Register</button>
     </form>
   )
