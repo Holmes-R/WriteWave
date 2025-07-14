@@ -2,29 +2,32 @@ import React from 'react'
 import { useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import api from "../../api/axios";
 
-const Login = ({use}) => {
+const Login = ({setUser,setToken}) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await api.post("/users/login", { email, password });
-            if(res.data.success){
-                localStorage.setItem("token", res.data.token);
-                localStorage.setItem("user", JSON.stringify(res.data.user));
-                setUser(res.data.user);
-                seToken(res.data.token);
-                navigate(`/profile/${res.data.user.id}` );
-            }else{
-                alert("Login failed. Please check your credentials.");  
-            }
-        } catch (error) {
-            alert("Error: " + err.response?.data?.message || err.message);  
+      e.preventDefault();
+      try {
+        const res = await api.post("/users/login", { email, password });
+
+        if (res.data.success) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+          setUser(res.data.user);
+          setToken(res.data.token);
+          navigate(`/profile/${res.data.user.id}`);
+        } else {
+          alert("Login failed: " + res.data.message);
         }
-    }
+      } catch (err) {
+        alert("Error: " + (err.response?.data?.message || err.message));
+      }
+    };
+
   return (
    <form onSubmit={handleLogin} style={formStyle}>
       <h2>Login</h2>

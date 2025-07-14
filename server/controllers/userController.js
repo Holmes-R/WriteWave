@@ -117,7 +117,7 @@ export const editProfile = async (req, res) => {
     const { username: newUsername, bio } = req.body || {};
     const avatar = req.file;
 
-    // ✅ Check if current user is the same or admin
+
     if (req.user.userId !== requestedUserId && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
