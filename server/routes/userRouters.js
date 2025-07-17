@@ -10,6 +10,5 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login); 
 router.get('/profile/:id', getProfile);
-router.put('/:id/edit', auth, upload.single('avatar'), editProfile);
-
+router.put('/:id/edit', upload.single('avatar'), editProfile); 
 export default router;

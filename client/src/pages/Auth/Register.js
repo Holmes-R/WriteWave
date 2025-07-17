@@ -4,51 +4,40 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 
 const Register = () => {
+  const [form,setForm] = useState({
+    username:"",
+    email:"",
+    password:"",
+})
 
-    const [form,setForm] = useState({
-        username:"",
-        email:"",
-        password:"",
-       // avatar:null,
+const navigate = useNavigate();
+
+const handleChange=(e)=>{
+    const {name,value} = e.target;
+    setForm({
+        ...form,
+        [name]: value,
     })
-    
-    const navigate = useNavigate();
+}
 
-    const handleChange=(e)=>{
-        const {name,value,files} = e.target;
-        setForm({
-            ...form,
-            [name]: name==="avatar"? files[0] : value,
-        })
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await api.post("/users/register", form);
+    console.log(res.data);
+    if (res.data.success) {
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      alert("Registration successful!");
+      navigate(`/profile/${res.data.user.id}/edit`);
+    } else {
+      alert("Registration failed: " + res.data.message);
     }
-    
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+  } catch (err) {
+    alert("Error: " + (err.response?.data?.message || err.message));
+  }
+}
 
-      const formData = new FormData();
-      for (let key in form) {
-        if (form[key]) formData.append(key, form[key]);
-      }
-
-      try {
-        const res = await api.post("/users/register", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        console.log(res.data);
-        if (res.data.success) {
-          const userID = res.data.user.id;
-           localStorage.setItem("token", res.data.token); 
-          localStorage.setItem("userID", userID);
-          alert("Registration successful!");
-          navigate(`/profile/${userID}/edit`);
-
-        } else {
-          alert("Registration failed: " + res.data.message);
-        }
-      } catch (err) {
-        alert("Error: " + err.response?.data?.message || err.message);
-      }
-    }
 
   return (
    <form onSubmit={handleSubmit} style={formStyle}>
@@ -87,7 +76,6 @@ const Register = () => {
 }
 
 export default Register
-
 
 const formStyle = {
   maxWidth: "400px",

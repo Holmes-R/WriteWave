@@ -5,55 +5,6 @@ import User from '../models/User.js';
 
 
 
-export const register = async (req, res) => {
-  try {
-    const { username, email, password } = req.body || {};
-
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username, email and password are required',
-      });
-    }
-
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email or username already exists',
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-      avatarUrl: null, // Avatar can be updated later
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      },
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message,
-    });
-  }
-};
-
-
-
 export const getProfile = async (req, res) => {
   try {
     console.log("Hari haran")
@@ -110,21 +61,62 @@ export const login = async (req, res) => {
   }
 };
 
-export const editProfile = async (req, res) => {
-  try {
-    const { id: requestedUserId } = req.params;
-    const { username: newUsername, bio } = req.body || {};
-    const avatar = req.file;
-    console.log(req.body);
 
-    if (req.user.userId !== requestedUserId && req.user.role !== 'admin') {
-      return res.status(403).json({
+// Remove all JWT-related code
+export const register = async (req, res) => {
+  try {
+    const { username, email, password } = req.body || {};
+
+    if (!username || !email || !password) {
+      return res.status(400).json({
         success: false,
-        message: "Unauthorized to edit this profile"
+        message: 'Username, email and password are required',
       });
     }
 
-    const user = await User.findById(requestedUserId);
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email or username already exists',
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      avatarUrl: null,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+      },
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message,
+    });
+  }
+};
+
+export const editProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bio } = req.body || {};
+    const avatar = req.file;
+
+    const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -132,8 +124,6 @@ export const editProfile = async (req, res) => {
       });
     }
 
-
-    if (newUsername) user.username = newUsername;
     if (bio) user.bio = bio;
     if (avatar) {
       user.avatarUrl = `/uploads/avatars/${avatar.filename}`;
